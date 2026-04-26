@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+<div class="auth-shell">
+    <button onclick="toggleDarkMode()" class="dark-toggle">🌙</button>
+    <div class="auth-card">
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Start building your personalized consistency tracker.</p>
+
+        <form method="POST">
+            <input type="email" name="email" placeholder="Enter Email" required>
+            <input type="password" name="password" placeholder="Create Password" required>
+            <button type="submit">💖 Sign Up</button>
+        </form>
+
+        <p class="auth-switch">Already have an account? <a href="/login">Login</a></p>
+    </div>
+</div>
+
+<script>
+const themeKey = "{{ session.get('theme_key', 'theme_guest') }}";
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem(themeKey, "dark");
+    } else {
+        localStorage.setItem(themeKey, "light");
+    }
+}
+
+// Load saved theme
+window.onload = function () {
+    if (localStorage.getItem(themeKey) === "dark") {
+        document.body.classList.add("dark");
+    }
+};
+</script>
+
+</body>
+</html>

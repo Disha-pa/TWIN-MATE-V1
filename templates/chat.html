@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Twin-Mate Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="chat-page">
+<div class="chat-shell">
+    <div class="chat-header">
+        <h2>Twin-Mate</h2>
+        <p>Your AI Buddy</p>
+        {% if chat_offline_mode %}
+            <span class="offline-badge">Offline demo mode</span>
+        {% endif %}
+    </div>
+
+    <div class="chat-history" id="chat-history">
+        {% for msg in chat_history %}
+            {% if msg.role == "user" %}
+                <div class="message-row user">
+                    <div class="message-bubble user-bubble">{{ msg.text }}</div>
+                </div>
+            {% else %}
+                <div class="message-row bot">
+                    <div class="message-bubble bot-bubble">{{ msg.text }}</div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <form method="POST" class="chat-input-wrap">
+        <input type="text" name="message" placeholder="Message Twin-Mate..." required>
+        <button type="submit" class="chat-send-btn">Send</button>
+    </form>
+</div>
+
+<div class="bottom-nav">
+    <a href="/home"><span class="nav-icon">🏠</span>Home</a>
+    <a href="/dashboard"><span class="nav-icon">📋</span>Tracker</a>
+    <a href="/chat"><span class="nav-icon">🤖</span>AI ChatBot</a>
+    <button type="button" onclick="toggleDarkMode()" class="theme-btn"><span class="nav-icon">🌓</span>Theme</button>
+</div>
+
+<script>
+const themeKey = "{{ session.get('theme_key', 'theme_guest') }}";
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem(themeKey, "dark");
+    } else {
+        localStorage.setItem(themeKey, "light");
+    }
+}
+
+// Load saved theme
+window.onload = function () {
+    if (localStorage.getItem(themeKey) === "dark") {
+        document.body.classList.add("dark");
+    }
+
+    const history = document.getElementById("chat-history");
+    if (history) {
+        history.scrollTop = history.scrollHeight;
+    }
+};
+</script>
+
+</body>
+</html>

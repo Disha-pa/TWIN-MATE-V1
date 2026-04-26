@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <h2 class="title">📋 Tracker</h2>
+    {% if reminder_banner %}
+        <div class="card small reminder-banner">⏰ {{ reminder_banner }}</div>
+    {% endif %}
+
+    <div class="stats-grid">
+        <div class="card small">
+            <p><strong>🔥 Current Streak</strong></p>
+            <p>{{ streak_days }} day(s)</p>
+        </div>
+        <div class="card small">
+            <p><strong>📈 Weekly Completion</strong></p>
+            <p>{{ weekly_completion }}%</p>
+        </div>
+        <div class="card small">
+            <p><strong>🎯 Level</strong></p>
+            <p>Level {{ level }}</p>
+        </div>
+        <div class="card small">
+            <p><strong>✅ Overall Completion</strong></p>
+            <p>{{ overall_completion }}%</p>
+        </div>
+    </div>
+
+    <div class="card small">
+        <p><strong>🏅 Achievements</strong></p>
+        {% if badges %}
+            <p>{{ badges | join(" • ") }}</p>
+        {% else %}
+            <p>Keep tracking daily to unlock badges.</p>
+        {% endif %}
+        <p>Done: {{ total_done }} | Missed: {{ total_missed }}</p>
+    </div>
+
+    <form method="POST" class="card small">
+        <input type="hidden" name="form_type" value="reminder">
+        <label><strong>🔔 Daily Reminder Time</strong></label>
+        <input type="time" name="reminder_time" value="{{ reminder_time }}">
+        <button type="submit">Save Reminder</button>
+    </form>
+
+    <div class="card small">
+        <p><strong>🧠 Weekly AI Review</strong></p>
+        <p>{{ weekly_review }}</p>
+        <p><strong>Best day:</strong> {{ best_weekday }} | <strong>Needs support:</strong> {{ worst_weekday }}</p>
+    </div>
+
+    <h3>🗓️ Consistency Heatmap</h3>
+    <div class="card">
+        {% if heatmap_days %}
+            <div class="heatmap-grid">
+                {% for cell in heatmap_days %}
+                    <div
+                        class="heat-cell"
+                        style="opacity: {{ (cell.score / 100) if cell.score > 0 else 0.15 }};"
+                        title="{{ cell.label }} - {{ cell.score }}%"
+                    ></div>
+                {% endfor %}
+            </div>
+            <p class="heatmap-note">Darker = better completion.</p>
+        {% else %}
+            <p>No tracking data yet for heatmap.</p>
+        {% endif %}
+    </div>
+
+    <h3>📆 Monthly Calendar (Interactive)</h3>
+    <div class="card">
+        <div class="calendar-nav">
+            <a href="/dashboard?year={{ prev_month_year }}&month={{ prev_month }}&selected_date={{ selected_date }}">◀</a>
+            <p><strong>{{ month_name }}</strong></p>
+            <a href="/dashboard?year={{ next_month_year }}&month={{ next_month }}&selected_date={{ selected_date }}">▶</a>
+        </div>
+        <div class="calendar-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        <div class="calendar-grid">
+            {% for week in calendar_weeks %}
+                {% for cell in week %}
+                    {% if cell %}
+                        <button
+                            type="button"
+                            class="calendar-cell {% if selected_date == cell.date_key %}active{% endif %}"
+                            style="opacity: {{ (cell.score / 100) if cell.score > 0 else 0.2 }};"
+                            title="{{ cell.date_key }} | {{ cell.score }}%"
+                            data-date="{{ cell.date_key }}"
+                            data-score="{{ cell.score }}"
+                            data-done="{{ cell.done }}"
+                            data-missed="{{ cell.missed }}"
+                            data-total="{{ cell.total }}"
+                            data-breakdown='{{ cell.per_goal | tojson }}'
+                            onclick="openDayModal(this)"
+                        >
+                            <span>{{ cell.day }}</span>
+                        </button>
+                    {% else %}
+                        <div class="calendar-cell empty"></div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        <div class="card small day-detail-card">
+            <p><strong>Selected Day: {{ selected_date }}</strong></p>
+            <p>Completion: {{ selected_day_details.score }}%</p>
+            <p>Done: {{ selected_day_details.done }} | Missed: {{ selected_day_details.missed }}</p>
+            <p>Total tracked goals: {{ selected_day_details.total }}</p>
+            <p>
+                <a href="/dashboard?year={{ selected_year }}&month={{ selected_month }}&selected_date={{ prev_week_date }}">⟵ Previous Week</a>
+                |
+                <a href="/dashboard?year={{ selected_year }}&month={{ selected_month }}&selected_date={{ next_week_date }}">Next Week ⟶</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="day-modal" class="modal-overlay" onclick="closeDayModal(event)">
+        <div class="modal-card">
+            <h3 id="modal-date-title">Day Details</h3>
+            <p id="modal-summary"></p>
+            <div id="modal-breakdown"></div>
+            <button type="button" onclick="closeDayModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Goals -->
+    <h3>🎯 Goal Checklist Progress</h3>
+    {% if goal_progress %}
+        {% for gp in goal_progress %}
+            <div class="card small">
+                <p><strong>{{ gp.action }}</strong> — Target: {{ gp.target_text }}</p>
+                {% if gp.target_days %}
+                    <p>Checklist: {{ gp.completed_days }} / {{ gp.target_days }} days</p>
+                    <p>Days missed: {{ gp.missed_days }}</p>
+                    <p>Task days marked: {{ gp.marked_days }} / {{ gp.target_days }}</p>
+                    <p>{{ gp.progress_percent }}% complete</p>
+                    <div class="progress-wrap">
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: {{ gp.progress_percent }}%;"></div>
+                        </div>
+                    </div>
+                    {% if gp.is_complete %}
+                        <p>✅ Goal complete, good job!</p>
+                    {% else %}
+                        <p>🕒 Keep going, you're making progress.</p>
+                    {% endif %}
+                    <p>💬 {{ gp.quote }}</p>
+                {% else %}
+                    <p>Checklist days completed: {{ gp.completed_days }}</p>
+                    <p>💡 Tip: set a numeric target (like 21 days) to auto-complete this goal.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card small">No goals found yet. Set your goals to start tracking.</div>
+    {% endif %}
+
+    <h3>📅 Day-Wise Goal Table</h3>
+    {% if goal_table_rows %}
+    <form method="POST" class="card" style="overflow-x:auto;">
+        <input type="hidden" name="form_type" value="statuses">
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align:left; padding:8px;">Goal</th>
+                    <th style="text-align:left; padding:8px;">Target Days</th>
+                    {% for d in day_headers %}
+                        <th style="text-align:center; padding:8px;">D{{ d }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in goal_table_rows %}
+                <tr>
+                    <td style="padding:8px;">{{ row.action }}</td>
+                    <td style="padding:8px;">{{ row.target_days if row.target_days else "-" }}</td>
+                    {% for chk in row.checks %}
+                        <td style="text-align:center; padding:8px;">
+                            {% if chk is none %}
+                                -
+                            {% else %}
+                                <select class="status-choice" name="status__{{ row.action }}__{{ loop.index }}" onchange="this.form.submit()">
+                                    <option value="" {% if chk == '' %}selected{% endif %}>⬜</option>
+                                    <option value="done" {% if chk == 'done' %}selected{% endif %}>✅</option>
+                                    <option value="not_done" {% if chk == 'not_done' %}selected{% endif %}>❌</option>
+                                </select>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Save Day-wise Status</button>
+    </form>
+    {% else %}
+    <div class="card small">No goals available to build day-wise table.</div>
+    {% endif %}
+
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+    <a href="/home"><span class="nav-icon">🏠</span>Home</a>
+    <a href="/dashboard"><span class="nav-icon">📋</span>Tracker</a>
+    <a href="/chat"><span class="nav-icon">🤖</span>AI ChatBot</a>
+    <button type="button" onclick="toggleDarkMode()" class="theme-btn"><span class="nav-icon">🌓</span>Theme</button>
+</div>
+
+<script>
+const themeKey = "{{ session.get('theme_key', 'theme_guest') }}";
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem(themeKey, "dark");
+    } else {
+        localStorage.setItem(themeKey, "light");
+    }
+}
+
+window.onload = function () {
+    if (localStorage.getItem(themeKey) === "dark") {
+        document.body.classList.add("dark");
+    }
+};
+
+function openDayModal(btn) {
+    const modal = document.getElementById("day-modal");
+    const title = document.getElementById("modal-date-title");
+    const summary = document.getElementById("modal-summary");
+    const breakdown = document.getElementById("modal-breakdown");
+
+    const date = btn.dataset.date;
+    const score = btn.dataset.score;
+    const done = btn.dataset.done;
+    const missed = btn.dataset.missed;
+    const total = btn.dataset.total;
+    const perGoal = JSON.parse(btn.dataset.breakdown || "[]");
+
+    title.textContent = "Day Details: " + date;
+    summary.textContent = `Completion ${score}% | Done ${done} | Missed ${missed} | Total ${total}`;
+    breakdown.innerHTML = "";
+
+    if (!perGoal.length) {
+        breakdown.innerHTML = "<p>No tracked goals for this day.</p>";
+    } else {
+        perGoal.forEach(item => {
+            const p = document.createElement("p");
+            const icon = item.status === "done" ? "✅" : (item.status === "not_done" ? "❌" : "⬜");
+            p.textContent = `${icon} ${item.action}`;
+            breakdown.appendChild(p);
+        });
+    }
+
+    modal.style.display = "flex";
+}
+
+function closeDayModal(e) {
+    const modal = document.getElementById("day-modal");
+    if (!e || e.target === modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+<div class="auth-shell">
+    <button onclick="toggleDarkMode()" class="dark-toggle">🌙</button>
+    <div class="auth-card">
+        <h2>Welcome Back</h2>
+        <p class="auth-subtitle">Login to continue your Twin-Mate routine.</p>
+
+        <form method="POST">
+            <input type="email" name="email" placeholder="Enter Email" required>
+            <input type="password" name="password" placeholder="Enter Password" required>
+            <button type="submit">✨ Login</button>
+        </form>
+
+        <p class="auth-switch">Don't have an account? <a href="/signup">Sign Up</a></p>
+    </div>
+</div>
+
+<script>
+const themeKey = "{{ session.get('theme_key', 'theme_guest') }}";
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem(themeKey, "dark");
+    } else {
+        localStorage.setItem(themeKey, "light");
+    }
+}
+
+// Load saved theme
+window.onload = function () {
+    if (localStorage.getItem(themeKey) === "dark") {
+        document.body.classList.add("dark");
+    }
+};
+</script>
+
+</body>
+</html>

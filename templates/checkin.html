@@ -1,0 +1,78 @@
+
+<h3>💗 Show up, even a little today</h3>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check-in</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<form method="POST">
+
+<h2>🌙 Daily Check-in</h2>
+
+<label>⚡ Energy:</label>
+<select name="energy">
+    <option>High</option>
+    <option>Medium</option>
+    <option>Low</option>
+</select>
+
+<label>💭 Emotion:</label>
+<select name="emotion">
+    <option>Happy</option>
+    <option>Stressed</option>
+    <option>Tired</option>
+    <option>Calm</option>
+    <option>Unmotivated</option>
+</select>
+
+<h3>✅ Routine Checklist</h3>
+{% for g in goals.goals %}
+<div class="card">
+    <p><strong>{{ g.action }}</strong> — Target: {{ g.target }}</p>
+    <input type="hidden" name="action_name" value="{{ g.action }}">
+    <select name="status" required>
+        <option value="complete">Completed</option>
+        <option value="partial">Partial</option>
+        <option value="tried">Tried</option>
+        <option value="rest">Intentional Rest</option>
+    </select>
+</div>
+{% endfor %}
+
+<button type="submit">💖 Submit Check-in</button>
+<a href="/goal"><button type="button">✏️ Edit / Customize Goals</button></a>
+
+</form>
+
+<div class="bottom-nav">
+    <a href="/home"><span class="nav-icon">🏠</span>Home</a>
+    <a href="/dashboard"><span class="nav-icon">📊</span>Dashboard</a>
+    <a href="/checkin"><span class="nav-icon">✅</span>Routine Checkup</a>
+    <a href="/chat"><span class="nav-icon">🤖</span>AI ChatBot</a>
+    <button type="button" onclick="toggleDarkMode()" class="theme-btn"><span class="nav-icon">🌓</span>Theme</button>
+</div>
+
+<script>
+const themeKey = "{{ session.get('theme_key', 'theme_guest') }}";
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem(themeKey, "dark");
+    } else {
+        localStorage.setItem(themeKey, "light");
+    }
+}
+
+// Load saved theme
+window.onload = function () {
+    if (localStorage.getItem(themeKey) === "dark") {
+        document.body.classList.add("dark");
+    }
+};
+</script>
+
+</body>
+</html>

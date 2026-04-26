@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Twin-Mate</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="center">
+<button onclick="toggleDarkMode()" class="dark-toggle">🌙</button>
+    <h1>💗 TWIN-MATE</h1>
+    <p>✨ Your AI Buddy ✨</p>
+
+    <img src="{{ url_for('static', filename='images/robot.png') }}" width="150">
+
+    <h4>— DISHA —</h4>
+
+    <a href="/home">
+        <button>✨ Enter ✨</button>
+    </a>
+<div class="bottom-nav">
+    <a href="/home">🏠</a>
+    <a href="/dashboard">📊</a>
+    <a href="/checkin">🌙</a>
+    <a href="/chat">🤖</a>
+</div>
+
+<script>
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem("theme", "dark");
+    } else {
+        localStorage.setItem("theme", "light");
+    }
+}
+
+// Load saved theme
+window.onload = function () {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark");
+    }
+};
+</script>
+
+</body>
+</html>

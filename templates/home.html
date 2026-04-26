@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="center">
+<h2>🌸 Choose Your Focus Area</h2>
+
+<div class="focus-grid">
+    <a class="focus-btn" href="/goal?category=Daily">💧 Daily Routine</a>
+    <a class="focus-btn" href="/goal?category=Fitness">🏋️ Fitness</a>
+    <a class="focus-btn" href="/goal?category=Studies">📚 Studies</a>
+    <a class="focus-btn" href="/goal?category=Finance">💰 Finances</a>
+    <a class="focus-btn" href="/goal?category=College">🎓 College</a>
+</div>
+<div class="bottom-nav">
+    <a href="/home"><span class="nav-icon">🏠</span>Home</a>
+    <a href="/dashboard"><span class="nav-icon">📋</span>Tracker</a>
+    <a href="/chat"><span class="nav-icon">🤖</span>AI ChatBot</a>
+    <button type="button" onclick="toggleDarkMode()" class="theme-btn"><span class="nav-icon">🌓</span>Theme</button>
+</div>
+
+<script>
+const themeKey = "{{ session.get('theme_key', 'theme_guest') }}";
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem(themeKey, "dark");
+    } else {
+        localStorage.setItem(themeKey, "light");
+    }
+}
+
+// Load saved theme
+window.onload = function () {
+    if (localStorage.getItem(themeKey) === "dark") {
+        document.body.classList.add("dark");
+    }
+};
+</script>
+
+</body>
+</html>
