@@ -16,6 +16,7 @@ body {
 /* 📱 CONTAINER */
 .center {
   max-width: 420px;
+  width: 100%;
   margin: auto;
   padding: 20px;
 }
@@ -316,6 +317,7 @@ canvas {
 .chat-page {
   padding: 0;
   max-width: 420px;
+  width: 100%;
   margin: 0 auto;
   min-height: 100vh;
 }
@@ -588,6 +590,27 @@ body.dark .auth-card {
 
 body.dark .auth-subtitle {
   color: #bbb;
+}
+
+@media (max-width: 768px) {
+  .center {
+    max-width: none;
+    padding: 16px;
+  }
+
+  .auth-shell,
+  .chat-page {
+    max-width: none;
+  }
+
+  .bottom-nav {
+    max-width: none;
+    width: 100%;
+  }
+
+  .chat-shell {
+    height: calc(100vh - 74px);
+  }
 }
 
 /* 🌙 TOGGLE BUTTON */
