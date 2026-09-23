@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Onboarding{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<div class="auth-shell">
+    <div class="auth-card">
+        <h2>Welcome to Twin Mate</h2>
+        <p class="auth-subtitle">Step {{ step }} of 2 — then you'll reach Home</p>
+
+        {% if step == 1 %}
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="step" value="1">
+            <label>What should we call you?</label>
+            <input type="text" name="name" placeholder="Your name" value="{{ user.name }}" required>
+            <button type="submit">Continue</button>
+        </form>
+        <form method="POST" style="margin-top:8px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="skip" value="1">
+            <button type="submit" class="secondary-btn">Skip — go to Home</button>
+        </form>
+        {% elif step == 2 %}
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="step" value="2">
+            <label>Pick your first focus area</label>
+            <select name="category" required>
+                <option value="Daily">Daily Routine</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Studies">Studies</option>
+                <option value="Finance">Finances</option>
+                <option value="College">College</option>
+            </select>
+            <button type="submit">Set Goals</button>
+        </form>
+        <form method="POST" style="margin-top:8px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="skip" value="1">
+            <button type="submit" class="secondary-btn">Skip — go to Home</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

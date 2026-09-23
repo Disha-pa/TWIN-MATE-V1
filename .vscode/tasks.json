@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Twin-Mate: Run Server",
+      "type": "shell",
+      "command": "${workspaceFolder}/run.bat",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Twin-Mate: Run Tests",
+      "type": "shell",
+      "command": "python -m pytest -q",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "FLASK_ENV": "testing"
+        }
+      },
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

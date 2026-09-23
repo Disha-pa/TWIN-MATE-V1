@@ -1,0 +1,25 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+      MONGO_URI: mongodb://mongo:27017/
+      DB_NAME: TWIN_MATE_V1
+      SECRET_KEY: dev-secret-change-me
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app
+    command: python app.py
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

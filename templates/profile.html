@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Profile & Settings</h2>
+
+    <div class="card profile-header">
+        <div class="profile-avatar-wrap">
+            {% if user.profile_pic %}
+            <img
+                class="profile-avatar"
+                src="{{ url_for('static', filename=user.profile_pic) }}?v={{ user.profile_pic }}"
+                alt="Profile picture"
+            >
+            {% else %}
+            <div class="profile-avatar profile-avatar-fallback" style="background: {{ user.avatar_color }};">
+                {{ user.initials }}
+            </div>
+            {% endif %}
+        </div>
+        <div>
+            <p><strong>{{ user.display_name }}</strong></p>
+            {% if user.username %}<p class="hint">@{{ user.username }}</p>{% endif %}
+            <p>{{ user.email }}</p>
+            {% if user.age %}<p class="hint">Age {{ user.age }}</p>{% endif %}
+        </div>
+    </div>
+
+    <form method="POST" class="card" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="update">
+
+        <h3>Profile details</h3>
+
+        <label>Profile picture</label>
+        <input type="file" name="profile_pic" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp">
+        <p class="hint">Optional. PNG/JPG/GIF/WEBP, keep it small.</p>
+        {% if user.profile_pic %}
+        <label class="hint">
+            <input type="checkbox" name="remove_pic" value="1"> Remove current picture
+        </label>
+        {% endif %}
+
+        <label>Name</label>
+        <input type="text" name="name" value="{{ user.name }}" placeholder="Your name">
+
+        <label>Username</label>
+        <input type="text" name="username" value="{{ user.username }}" placeholder="e.g. disha_01" pattern="[A-Za-z0-9_]{3,20}">
+        <p class="hint">3–20 characters: letters, numbers, underscore.</p>
+
+        <label>Age</label>
+        <input type="number" name="age" min="5" max="120" value="{{ user.age or '' }}" placeholder="e.g. 21">
+
+        <label>Timezone</label>
+        <input type="text" name="timezone" value="{{ user.timezone }}" placeholder="UTC">
+
+        <label>Reminder time</label>
+        <input type="time" name="reminder_time" value="{{ user.reminder_time }}" disabled>
+        <p class="hint">Change reminder time on the Tracker page.</p>
+
+        <button type="submit">Save Profile</button>
+    </form>
+
+    <form method="POST" class="card">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="password">
+        <h3>Change Password</h3>
+        <input type="password" name="current_password" placeholder="Current password" required>
+        <input type="password" name="new_password" placeholder="New password (6+ chars)" required minlength="6">
+        <button type="submit">Update Password</button>
+    </form>
+
+    <div class="card">
+        <h3>Data & Notifications</h3>
+        <a href="{{ url_for('profile.export_data') }}" class="link-btn">Export my data (JSON)</a>
+        <button type="button" id="enable-push" class="secondary-btn">Enable push reminders</button>
+    </div>
+
+    <div class="card">
+        <h3>Account</h3>
+        <a href="{{ url_for('auth.logout') }}" class="link-btn">Log out</a>
+    </div>
+
+    <form method="POST" class="card danger-zone" onsubmit="return confirm('Delete your account permanently?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="delete">
+        <h3>Delete Account</h3>
+        <button type="submit" class="danger-btn">Delete Account</button>
+    </form>
+</div>
+{% endblock %}
+{% block bottom_nav %}{% include "partials/bottom_nav.html" %}{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('enable-push')?.addEventListener('click', async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        alert('Push notifications not supported in this browser.');
+        return;
+    }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true });
+    await fetch('{{ url_for("profile.push_subscribe") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+        body: JSON.stringify(sub.toJSON()),
+    });
+    alert('Push notifications enabled.');
+});
+</script>
+{% endblock %}

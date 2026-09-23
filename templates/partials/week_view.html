@@ -1,0 +1,29 @@
+<div class="week-view card">
+    <h3>This Week</h3>
+    <div class="week-grid">
+        {% for day in week_days %}
+        <div class="week-day {% if day.is_today %}today{% endif %}">
+            <span class="week-label">{{ day.label }}</span>
+            <span class="week-num">{{ day.day_num }}</span>
+            <div class="week-score" style="opacity: {{ (day.score / 100) if day.score > 0 else 0.15 }};">{{ day.score }}%</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if goals.goals %}
+    <form hx-post="{{ url_for('dashboard.week_update') }}" hx-target="#week-view" hx-swap="innerHTML" class="today-quick-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <p><strong>Quick update today</strong></p>
+        {% set today_statuses = today_checkin.statuses if today_checkin and today_checkin.statuses else {} %}
+        {% for g in goals.goals %}
+        <label>{{ g.action }}</label>
+        <select class="status-choice" name="status__{{ g.action }}">
+            {% set st = today_statuses.get(g.action, '') %}
+            <option value="" {% if st == '' %}selected{% endif %}>Unmarked</option>
+            <option value="done" {% if st == 'done' %}selected{% endif %}>Done</option>
+            <option value="not_done" {% if st == 'not_done' %}selected{% endif %}>Not done</option>
+        </select>
+        {% endfor %}
+        <button type="submit">Save Today</button>
+    </form>
+    {% endif %}
+</div>

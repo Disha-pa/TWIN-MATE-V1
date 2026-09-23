@@ -29,34 +29,45 @@ const categoryActions = {
 function loadActions(category) {
     const container = document.getElementById("actions-container");
     container.innerHTML = "";
-
-    let actions = categoryActions[category] || [];
-
-    actions.forEach(item => {
+    (categoryActions[category] || []).forEach((item) => {
         createActionInput(item.action, item.target, item.days);
     });
 }
 
 function createActionInput(actionName, targetValue = "", targetDays = "") {
     const container = document.getElementById("actions-container");
-
     const div = document.createElement("div");
     div.className = "card";
 
-    div.innerHTML = `
-        <h4>${actionName}</h4>
-        <input type="hidden" name="action_name" value="${actionName}">
-        <input type="text" name="target_value" value="${targetValue}" placeholder="Goal details (e.g. Drink water)">
-        <input type="number" name="target_days" min="1" value="${targetDays}" placeholder="Number of days (e.g. 21)" required>
-    `;
+    const title = document.createElement("h4");
+    title.textContent = actionName;
 
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = "action_name";
+    hidden.value = actionName;
+
+    const target = document.createElement("input");
+    target.type = "text";
+    target.name = "target_value";
+    target.value = targetValue;
+    target.placeholder = "Goal details (e.g. Drink water)";
+
+    const days = document.createElement("input");
+    days.type = "number";
+    days.name = "target_days";
+    days.min = "1";
+    days.value = targetDays;
+    days.placeholder = "Number of days (e.g. 21)";
+    days.required = true;
+
+    div.append(title, hidden, target, days);
     container.appendChild(div);
 }
 
 function addCustomAction() {
     const actionName = prompt("Enter your custom action:");
-
     if (actionName) {
-        createActionInput(actionName, "", "");
+        createActionInput(actionName.trim(), "", "");
     }
 }

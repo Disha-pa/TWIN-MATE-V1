@@ -10,3 +10,5 @@ __pycache__/
 venv/
 env/
 ENV/
+static/uploads/avatars/*
+!static/uploads/avatars/.gitkeep
